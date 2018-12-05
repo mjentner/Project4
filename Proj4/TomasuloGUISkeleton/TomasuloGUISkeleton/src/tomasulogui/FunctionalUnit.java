@@ -22,7 +22,7 @@ public abstract class FunctionalUnit {
 
   public void execCycle(CDB cdb) {
     //start executing, ask for CDB, etc.
-    if (cdb.dataValid == false) {
+    if (cdb.getDataValid() == false) {
        cdb.setDataValid(true);
        cdb.setDataTag(stations[0].tag1);
        cdb.setDataValue(stations[0].data1);
