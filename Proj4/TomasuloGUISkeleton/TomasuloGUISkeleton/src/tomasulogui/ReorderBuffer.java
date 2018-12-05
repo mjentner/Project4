@@ -56,7 +56,10 @@ public class ReorderBuffer {
 
     // TODO - this is where you look at the type of instruction and
     // figure out how to retire it properly
-    if (retiree.branchMispredicted()) {
+    if (!retiree.isComplete()) {
+        shouldAdvance = false;
+    }
+    else if (retiree.branchMispredicted()) {
         shouldAdvance = false;
         frontQ = 0;
         rearQ = 0;
@@ -73,7 +76,7 @@ public class ReorderBuffer {
                                           retiree.getWriteValue());
     }
     else {
-        simulator.regs.setReg(retiree.getWriteReg(), retiree.getWriteValue());
+        regs.setReg(retiree.getWriteReg(), retiree.getWriteValue());
     }
       // if mispredict branch, won't do normal advance
       if (shouldAdvance) {
@@ -89,8 +92,16 @@ public class ReorderBuffer {
     // check entire CDB for someone waiting on this data
     // could be destination reg
     // could be store address source
-
+    
     // TODO body of method
+    if (cdb.getDataValid()) {
+        for (int i = frontQ; i != rearQ; i %= size) {
+            buff[i].readCDB(cdb);
+        }
+        int tag = cdb.getDataTag();
+        buff[tag].setWriteValue(cdb.getDataValue());
+        buff[tag].setComplete(true);
+    }
   }
 
   public void updateInstForIssue(IssuedInst inst) {
