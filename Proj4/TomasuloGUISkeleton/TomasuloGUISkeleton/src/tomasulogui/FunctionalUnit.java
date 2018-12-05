@@ -11,7 +11,9 @@ public abstract class FunctionalUnit {
 
  
   public void squashAll() {
-    // todo fill in
+    //fill in
+    stations[0].data1Valid = false;
+    stations[1].data2Valid = false;
   }
 
   public abstract int calculateResult(int station);
@@ -19,13 +21,24 @@ public abstract class FunctionalUnit {
   public abstract int getExecCycles();
 
   public void execCycle(CDB cdb) {
-    //todo - start executing, ask for CDB, etc.
+    //start executing, ask for CDB, etc.
+    if (cdb.getDataValid() == false) {
+       cdb.setDataValid(true);
+       cdb.setDataTag(stations[0].tag1);
+       cdb.setDataValue(stations[0].data1);
+       cdb.setDataValid(true);
+    }
   }
 
 
 
   public void acceptIssue(IssuedInst inst) {
-  // todo - fill in reservation station (if available) with data from inst
+  //fill in reservation station (if available) with data from inst
+    if (stations[0].data1Valid) {
+          stations[0].loadInst(inst);
+    } else if (stations[1].data2Valid) {
+        stations[1].loadInst(inst);
+    }
   }
 
 }
