@@ -45,6 +45,13 @@ public class ReservationStation {
 
   public void snoop(CDB cdb) {
     // TODO - add code to snoop on CDB each cycle
+    if (cdb.dataTag == tag1) {
+        data1 = cdb.dataValue;
+        data1Valid = cdb.dataValid;
+    } else if (cdb.dataTag == tag2) {
+        data2 = cdb.dataValue;
+        data2Valid = cdb.dataValid;
+    }
   }
 
   public boolean isReady() {
