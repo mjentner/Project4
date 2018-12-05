@@ -63,11 +63,7 @@ public class ReorderBuffer {
         shouldAdvance = false;
         frontQ = 0;
         rearQ = 0;
-        simulator.alu.squashAll();
-        simulator.branchUnit.squashAll();
-        simulator.divider.squashAll();
-        simulator.loader.squashAll();
-        simulator.multiplier.squashAll();
+        simulator.squashAllInsts();
         simulator.pc.setPC(retiree.getPredictTaken() ? 
                            retiree.getInstPC() : retiree.getTarget());
     }
@@ -77,6 +73,7 @@ public class ReorderBuffer {
     }
     else {
         regs.setReg(retiree.getWriteReg(), retiree.getWriteValue());
+        setTagForReg(retiree.getWriteReg(), -1);
     }
       // if mispredict branch, won't do normal advance
       if (shouldAdvance) {

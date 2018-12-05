@@ -73,7 +73,8 @@ public class ROBEntry {
   }
 
   public void setBranchTaken(boolean result) {
-  // TODO - maybe more than simple set
+      complete = true;
+      mispredicted = predictTaken == result;
   }
   
   
@@ -94,9 +95,45 @@ public class ROBEntry {
     writeValue = value;
   }
 
+  
   public void copyInstData(IssuedInst inst, int frontQ) {
     instPC = inst.getPC();
+    opcode = inst.getOpcode();
+    complete = opcode == IssuedInst.INST_TYPE.NOP
+            || opcode == IssuedInst.INST_TYPE.HALT;
+    predictTaken = inst.getBranchPrediction();
+    mispredicted = false;
+    
+    int reg1 = inst.getRegSrc1();
+    int reg1Tag = rob.getTagForReg(reg1);
+    int reg1Val = rob.getDataForReg(reg1);
+    
+    int reg2 = inst.getRegSrc2();
+    int reg2Tag = rob.getTagForReg(reg2);
+    int reg2Val = rob.getDataForReg(reg2);
+    
+    haveStoreAddress = reg1Tag == -1;
+    haveStoreData = reg2Tag == -1;
+    storeDataReg = reg2;
+    storeAddressReg = reg1;
+    target = inst.getBranchTgt();
+    writeReg = inst.getRegDest();
+    writeValue = reg2Val;
+    writeAddress = haveStoreAddress ?
+                   inst.getImmediate() + reg1Val :
+                   inst.getImmediate();
+
     inst.setRegDestTag(frontQ);
+    inst.setRegSrc1Value(reg1Val);
+    inst.setRegSrc1Tag(reg1Tag);
+    if (haveStoreAddress) {
+        inst.setRegSrc1Valid();
+    }
+    inst.setRegSrc2Value(reg2Val);
+    inst.setRegSrc2Tag(reg2Tag);
+    if (haveStoreData) {
+        inst.setRegSrc2Valid();
+    }
 
     // TODO - This is a long and complicated method, probably the most complex
     // of the project.  It does 2 things:
