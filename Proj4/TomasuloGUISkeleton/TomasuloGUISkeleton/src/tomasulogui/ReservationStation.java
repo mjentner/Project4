@@ -44,7 +44,7 @@ public class ReservationStation {
   }
 
   public void snoop(CDB cdb) {
-    // TODO - add code to snoop on CDB each cycle
+    //code to snoop on CDB each cycle
     if (cdb.dataTag == tag1) {
         data1 = cdb.dataValue;
         data1Valid = cdb.dataValid;
@@ -60,5 +60,8 @@ public class ReservationStation {
 
   public void loadInst(IssuedInst inst) {
     // TODO add code to insert inst into reservation station
+    destTag = inst.regDestTag;
+    function = inst.opcode;
+    address = inst.branchTgt;
   }
 }
