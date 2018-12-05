@@ -8,9 +8,11 @@ public class ROBEntry {
   boolean complete = false;
   boolean predictTaken = false;
   boolean mispredicted = false;
+  int target = -1;
   int instPC = -1;
   int writeReg = -1;
   int writeValue = -1;
+  int writeAddress = -1;
 
   IssuedInst.INST_TYPE opcode;
 
@@ -33,11 +35,50 @@ public class ROBEntry {
   public int getInstPC() {
     return instPC;
   }
+  
+  public int getTarget() {
+      return target;
+  }
 
   public IssuedInst.INST_TYPE getOpcode () {
     return opcode;
   }
 
+//  public boolean isRegDest() {
+//      return opcode == IssuedInst.INST_TYPE.ADD 
+//          || opcode == IssuedInst.INST_TYPE.ADDI
+//          || opcode == IssuedInst.INST_TYPE.SUB
+//          || opcode == IssuedInst.INST_TYPE.MUL
+//          || opcode == IssuedInst.INST_TYPE.DIV
+//          || opcode == IssuedInst.INST_TYPE.AND
+//          || opcode == IssuedInst.INST_TYPE.ANDI
+//          || opcode == IssuedInst.INST_TYPE.OR
+//          || opcode == IssuedInst.INST_TYPE.ORI
+//          || opcode == IssuedInst.INST_TYPE.XOR
+//          || opcode == IssuedInst.INST_TYPE.XORI
+//          || opcode == IssuedInst.INST_TYPE.SLL
+//          || opcode == IssuedInst.INST_TYPE.SRL
+//          || opcode == IssuedInst.INST_TYPE.SRA
+//          || opcode == IssuedInst.INST_TYPE.LOAD
+//          || opcode == IssuedInst.INST_TYPE.NOP;
+//  }
+  
+//  public boolean isStore() {
+//      return opcode == IssuedInst.INST_TYPE.STORE;
+//  }
+  
+//  public boolean isBranch() {
+//      return opcode == IssuedInst.INST_TYPE.BEQ
+//          || opcode == IssuedInst.INST_TYPE.BNE
+//          || opcode == IssuedInst.INST_TYPE.BLTZ
+//          || opcode == IssuedInst.INST_TYPE.BLEZ
+//          || opcode == IssuedInst.INST_TYPE.BGEZ
+//          || opcode == IssuedInst.INST_TYPE.BGTZ
+//          || opcode == IssuedInst.INST_TYPE.J
+//          || opcode == IssuedInst.INST_TYPE.JAL
+//          || opcode == IssuedInst.INST_TYPE.JR
+//          || opcode == IssuedInst.INST_TYPE.JALR;
+//  }
 
   public boolean isHaltOpcode() {
     return (opcode == IssuedInst.INST_TYPE.HALT);
@@ -45,6 +86,10 @@ public class ROBEntry {
 
   public void setBranchTaken(boolean result) {
   // TODO - maybe more than simple set
+  }
+  
+  public int getWriteAddress() {
+      return writeAddress;
   }
 
   public int getWriteReg() {

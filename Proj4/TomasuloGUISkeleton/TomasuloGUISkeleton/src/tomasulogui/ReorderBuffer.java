@@ -56,7 +56,25 @@ public class ReorderBuffer {
 
     // TODO - this is where you look at the type of instruction and
     // figure out how to retire it properly
-
+    if (retiree.branchMispredicted()) {
+        shouldAdvance = false;
+        frontQ = 0;
+        rearQ = 0;
+        simulator.alu.squashAll();
+        simulator.branchUnit.squashAll();
+        simulator.divider.squashAll();
+        simulator.loader.squashAll();
+        simulator.multiplier.squashAll();
+        simulator.pc.setPC(retiree.getPredictTaken() ? 
+                           retiree.getInstPC() : retiree.getTarget());
+    }
+    else if (retiree.getOpcode() == IssuedInst.INST_TYPE.STORE) {
+        simulator.memory.setIntDataAtAddr(retiree.getWriteAddress(),
+                                          retiree.getWriteValue());
+    }
+    else {
+        simulator.regs.setReg(retiree.getWriteReg(), retiree.getWriteValue());
+    }
       // if mispredict branch, won't do normal advance
       if (shouldAdvance) {
         numRetirees++;
