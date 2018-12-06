@@ -33,13 +33,22 @@ public abstract class FunctionalUnit {
 
 
 
-  public void acceptIssue(IssuedInst inst) {
+  public boolean acceptIssue(IssuedInst inst) {
   //fill in reservation station (if available) with data from inst
-    if (stations[0].data1Valid) {
+    if (stations[0].isAvailable()) {
           stations[0].loadInst(inst);
-    } else if (stations[1].data2Valid) {
+		  return true;
+    } else if (stations[1].isAvailable()) {
         stations[1].loadInst(inst);
+		return true;
     }
+	else {
+		return false;
+	}
+  }
+
+  public boolean full() {
+	  return !(stations[0].isAvailable() || stations[1].isAvailable());
   }
 
 }

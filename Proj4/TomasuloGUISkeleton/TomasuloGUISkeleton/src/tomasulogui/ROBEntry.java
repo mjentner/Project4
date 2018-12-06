@@ -105,32 +105,42 @@ public class ROBEntry {
     mispredicted = false;
     
     int reg1 = inst.getRegSrc1();
-    int reg1Tag = rob.getTagForReg(reg1);
-    int reg1Val = rob.getDataForReg(reg1);
+	int reg1Tag;
+	int reg1Val;
+	boolean reg1Valid = reg1 != -1;
+	if (reg1Valid) {
+		reg1Tag = rob.getTagForReg(reg1);
+		reg1Val = rob.getDataForReg(reg1);
+		haveStoreAddress = reg1Tag == -1;
+		writeAddress = haveStoreAddress ? 
+					inst.getImmediate() + reg1Val :
+					inst.getImmediate();
+		inst.setRegSrc1Value(reg1Val);
+		inst.setRegSrc1Tag(reg1Tag);
+	}
     
     int reg2 = inst.getRegSrc2();
-    int reg2Tag = rob.getTagForReg(reg2);
-    int reg2Val = rob.getDataForReg(reg2);
+	int reg2Tag;
+	int reg2Val;
+	boolean reg2Valid = reg2 != -1;
+	if (reg2Valid) {
+		reg2Tag = rob.getTagForReg(reg2);
+		reg2Val = rob.getDataForReg(reg2);
+		haveStoreData = reg2Tag == -1;
+		writeValue = reg2Val;
+		inst.setRegSrc2Value(reg2Val);
+		inst.setRegSrc2Tag(reg2Tag);
+	}
     
-    haveStoreAddress = reg1Tag == -1;
-    haveStoreData = reg2Tag == -1;
     storeDataReg = reg2;
     storeAddressReg = reg1;
     target = inst.getBranchTgt();
     writeReg = inst.getRegDest();
-    writeValue = reg2Val;
-    writeAddress = haveStoreAddress ?
-                   inst.getImmediate() + reg1Val :
-                   inst.getImmediate();
 
     inst.setRegDestTag(frontQ);
-    inst.setRegSrc1Value(reg1Val);
-    inst.setRegSrc1Tag(reg1Tag);
     if (haveStoreAddress) {
         inst.setRegSrc1Valid();
     }
-    inst.setRegSrc2Value(reg2Val);
-    inst.setRegSrc2Tag(reg2Tag);
     if (haveStoreData) {
         inst.setRegSrc2Valid();
     }

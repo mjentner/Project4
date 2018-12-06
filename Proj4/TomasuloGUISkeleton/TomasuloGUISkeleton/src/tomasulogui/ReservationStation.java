@@ -9,6 +9,7 @@ public class ReservationStation {
   int data2;
   boolean data1Valid = false;
   boolean data2Valid = false;
+  boolean available = true;
   // destTag doubles as branch tag
   int destTag;
   IssuedInst.INST_TYPE function = IssuedInst.INST_TYPE.NOP;
@@ -27,6 +28,10 @@ public class ReservationStation {
     return destTag;
   }
 
+  public boolean isAvailable() {
+	  return available;
+  }
+  
   public int getData1() {
     return data1;
   }
