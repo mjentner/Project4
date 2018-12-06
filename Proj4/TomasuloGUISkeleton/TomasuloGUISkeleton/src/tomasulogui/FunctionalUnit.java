@@ -6,8 +6,6 @@ public abstract class FunctionalUnit {
   
   public FunctionalUnit(PipelineSimulator sim) {
     simulator = sim;
-    stations[0] = new ReservationStation(sim);
-    stations[1] = new ReservationStation(sim);
   }
 
  
@@ -21,13 +19,17 @@ public abstract class FunctionalUnit {
 
   public abstract int getExecCycles();
 
+  // This method should never be called once equivalent
+  // methods on the child classes have been implemented
+  // It should probably just be deleted eventually
+  // Right now, however, the program doesn't compile without it
   public void execCycle(CDB cdb) {
     //start executing, ask for CDB, etc.
     if (cdb.getDataValid() == false) {
-       cdb.setDataValid(true);
-       cdb.setDataTag(stations[0].tag1);
-       cdb.setDataValue(stations[0].data1);
-       cdb.setDataValid(true);
+//       cdb.setDataValid(true);
+//       cdb.setDataTag(stations[0].tag1);
+//       cdb.setDataValue(stations[0].data1);
+//       cdb.setDataValid(true);
     }
   }
 
@@ -35,11 +37,12 @@ public abstract class FunctionalUnit {
 
   public boolean acceptIssue(IssuedInst inst) {
   //fill in reservation station (if available) with data from inst
-    if (stations[0].isAvailable()) {
-          stations[0].loadInst(inst);
-		  return true;
-    } else if (stations[1].isAvailable()) {
-        stations[1].loadInst(inst);
+    if (stations[0] == null) {
+		stations[0] = new ReservationStation(simulator);
+		stations[0].loadInst(inst);
+		return true;
+    } else if (stations[1] == null) {
+        stations[1] = new ReservationStation(simulator);
 		return true;
     }
 	else {
@@ -48,7 +51,7 @@ public abstract class FunctionalUnit {
   }
 
   public boolean full() {
-	  return !(stations[0].isAvailable() || stations[1].isAvailable());
+	  return stations[0] != null && stations[1] != null;
   }
 
 }

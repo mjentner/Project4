@@ -36,6 +36,7 @@ public class IssueUnit {
 		int pc = simulator.getPC();
 		Instruction inst = simulator.getMemory().getInstAtAddr(pc);
 		issuee = IssuedInst.createIssuedInst(inst);
+		issuee.setPC(pc);
 
 		// Set fu based on needed functional unit
 		IssuedInst.INST_TYPE opcode = issuee.getOpcode();
@@ -92,6 +93,20 @@ public class IssueUnit {
 		simulator.getROB().updateInstForIssue(issuee);
 
 		// TODO check CDB for forward data
+		CDB cdb = simulator.getCDB();
+		if (cdb.getDataValid()) {
+			int cdbTag = cdb.getDataTag();
+			int cdbValue = cdb.getDataValue();
+			if (!issuee.getRegSrc1Valid() && issuee.getRegSrc1Tag() == cdbTag) {
+				issuee.setRegSrc1Valid();
+				issuee.setRegSrc1Value(cdbValue);
+			}
+			if (!issuee.getRegSrc2Valid() && issuee.getRegSrc2Tag() == cdbTag) {
+				issuee.setRegSrc2Valid();
+				issuee.setRegSrc2Value(cdbValue);
+			}
+		}
+		
 		
 		// Issue instruction
 		if (fu != null) {
