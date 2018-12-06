@@ -25,6 +25,14 @@ public class IssueUnit {
       //    so that we can forward during issue
 
       // We then send this to the FU, who stores in reservation station
+      ReorderBuffer rob = simulator.getROB();
+      if (rob.isFull()) {
+          return;
+      }
+      int pc = simulator.getPC();
+      Instruction inst = simulator.getMemory().getInstAtAddr(pc);
+      issuee = IssuedInst.createIssuedInst(inst);
+
     }
 
   }

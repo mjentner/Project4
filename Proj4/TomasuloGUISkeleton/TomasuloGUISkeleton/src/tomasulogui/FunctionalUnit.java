@@ -6,7 +6,8 @@ public abstract class FunctionalUnit {
   
   public FunctionalUnit(PipelineSimulator sim) {
     simulator = sim;
-    
+    stations[0] = new ReservationStation(sim);
+    stations[1] = new ReservationStation(sim);
   }
 
  
