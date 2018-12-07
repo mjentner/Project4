@@ -9,7 +9,7 @@ public class IntMult extends FunctionalUnit {
     }
 
     public int calculateResult(int station) {
-        int result = 0;
+        int result = stations[station].getData1() * stations[station].getData2();
         return result;
 
     }
