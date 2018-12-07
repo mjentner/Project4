@@ -50,7 +50,10 @@ public abstract class FunctionalUnit {
       stations[writebackStation] = null;
       writebackStation = -1;
       requestWriteback = false;
-	  executionStage = -1;
+	  executionStage = -1; 
+          cdb.setDataTag(stations[writebackStation].getDestTag());
+          cdb.setDataValue(writeData);
+          cdb.setDataValid(true);
     }
     // only execute if not stuck
     if (!requestWriteback) {
