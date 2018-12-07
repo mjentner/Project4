@@ -51,6 +51,7 @@ public abstract class FunctionalUnit {
       writebackStation = -1;
       requestWriteback = false;
 	  executionStage = -1; 
+          //Dr.G said we needed this here instead of in each FU
           cdb.setDataTag(stations[writebackStation].getDestTag());
           cdb.setDataValue(writeData);
           cdb.setDataValid(true);
