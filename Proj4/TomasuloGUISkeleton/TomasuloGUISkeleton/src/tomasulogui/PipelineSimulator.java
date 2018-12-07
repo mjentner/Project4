@@ -274,7 +274,7 @@ public class PipelineSimulator {
     }
 
     public void step() {
-      isHalted = reorder.retireInst();
+     isHalted = reorder.retireInst();
 
       if (!isHalted) {
         if (!quietMode) {
@@ -373,7 +373,32 @@ public class PipelineSimulator {
       cdb.setDataValid(false);
 
       // hint: start with divider, and give it first chance of getting CDB
-
+	  FunctionalUnit writer = null;
+	  if (divider.isRequestingWriteback()) {
+		  writer = divider;
+	  }
+	  else if (multiplier.isRequestingWriteback()) {
+		  writer = multiplier;
+	  }
+	  else if (branchUnit.isRequestingWriteback()) {
+		  writer = branchUnit;
+	  }
+	  else if (loader.isRequestingWriteback()) {
+		  loader.setCanWriteback();
+		  cdb.setDataValid(true);
+		  cdb.setDataTag(loader.getWriteTag());
+		  cdb.setDataValue(loader.getWriteData());
+	  }
+	  else if (alu.isRequestingWriteback()) {
+		  writer = alu;
+	  }
+	  if (writer != null) {
+		  writer.setCanWriteback();
+		  cdb.setDataValid(true);
+		  cdb.setDataTag(writer.getWriteTag());
+		  cdb.setDataValue(writer.getWriteData());
+	  }
+	  reorder.readCDB(cdb);
     }
 
     public static void main(String[] args) {

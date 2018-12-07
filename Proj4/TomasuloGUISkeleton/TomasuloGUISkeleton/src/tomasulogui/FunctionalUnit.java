@@ -1,8 +1,31 @@
 package tomasulogui;
 
 public abstract class FunctionalUnit {
-  PipelineSimulator simulator;
-  ReservationStation[] stations = new ReservationStation[2];
+	public static final int BUFFER_SIZE = 2;
+	PipelineSimulator simulator;
+	ReservationStation[] stations = new ReservationStation[2];
+	boolean canWriteback = false;
+	int writebackStation = -1;
+	boolean requestWriteback = false;
+	int executionStage = -1;
+	int writeData = -1;
+	int writeTag = -1;
+
+	public boolean isRequestingWriteback() {
+		return requestWriteback;
+	}
+
+	public void setCanWriteback() {
+		canWriteback = true;
+	}
+
+	public int getWriteTag() {
+		return writeTag;
+	}
+
+	public int getWriteData() {
+		return writeData;
+	}
   
   public FunctionalUnit(PipelineSimulator sim) {
     simulator = sim;
@@ -11,48 +34,80 @@ public abstract class FunctionalUnit {
  
   public void squashAll() {
     //fill in
-    stations[0].data1Valid = false;
-    stations[1].data2Valid = false;
+//	executionProgress = -1;
+//	stationInUse = -1;
+	stations[0] = null;
+	stations[1] = null;
   }
 
   public abstract int calculateResult(int station);
 
   public abstract int getExecCycles();
 
-  // This method should never be called once equivalent
-  // methods on the child classes have been implemented
-  // It should probably just be deleted eventually
-  // Right now, however, the program doesn't compile without it
   public void execCycle(CDB cdb) {
-    //start executing, ask for CDB, etc.
-    if (cdb.getDataValid() == false) {
-//       cdb.setDataValid(true);
-//       cdb.setDataTag(stations[0].tag1);
-//       cdb.setDataValue(stations[0].data1);
-//       cdb.setDataValid(true);
+    // first check if a reservation station was freed by writeback
+    if (canWriteback) {
+      stations[writebackStation] = null;
+      writebackStation = -1;
+      requestWriteback = false;
+	  executionStage = -1;
     }
+    // only execute if not stuck
+    if (!requestWriteback) {
+		if (executionStage == -1) {
+			for (int i = 0; i < BUFFER_SIZE; i++) {
+				ReservationStation station = stations[i];
+				if (station != null && station.isReady()) {
+					writebackStation = i;
+					writeTag = station.getDestTag();
+					executionStage = 1;
+					break;
+				}
+			}
+		}
+		else {
+			executionStage++;
+		}
+		if (executionStage == getExecCycles()) {
+			
+			// we are finished execution
+
+			requestWriteback = true;
+			writeData = calculateResult(writebackStation);
+		}
+
+    }
+    // check reservationStations for cdb data
+    if (cdb.getDataValid()) {
+      for (int i = 0; i < BUFFER_SIZE; i++) {
+        if (stations[i] != null) {
+          stations[i].snoop(cdb);
+        }
+      }
+    }
+	canWriteback = false;
   }
 
-
-
-  public boolean acceptIssue(IssuedInst inst) {
+  public void acceptIssue(IssuedInst inst) {
   //fill in reservation station (if available) with data from inst
-    if (stations[0] == null) {
-		stations[0] = new ReservationStation(simulator);
-		stations[0].loadInst(inst);
-		return true;
-    } else if (stations[1] == null) {
-        stations[1] = new ReservationStation(simulator);
-		stations[1].loadInst(inst);
-		return true;
-    }
-	else {
-		return false;
-	}
+    int slot=0;
+    for (slot=0; slot < BUFFER_SIZE; slot++) {
+     if (stations[slot] == null) {
+       break;
+     }
+   }
+   if (slot == BUFFER_SIZE) {
+     throw new MIPSException("Functional Unit accept issue: station not available");
+   }
+
+   ReservationStation station = new ReservationStation(simulator);
+   stations[slot] = station;
+
+   station.loadInst (inst);
   }
 
-  public boolean full() {
-	  return stations[0] != null && stations[1] != null;
+  public boolean isReservationStationAvail() {
+	  return stations[0] == null || stations[1] == null;
   }
 
 }

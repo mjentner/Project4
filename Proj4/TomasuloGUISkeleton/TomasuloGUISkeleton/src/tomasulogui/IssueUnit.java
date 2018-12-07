@@ -79,14 +79,18 @@ public class IssueUnit {
 				fu = simulator.getBranchUnit();
 				break;
 			}
+			case LOAD: {
+				fu = simulator.getLoader();
+			}
 			default :
 		}
 
-		// Make sure there is a reservation station available
-		if (fu != null) {
-			if (((FunctionalUnit)fu).full()) {
-				return;
-			}
+		// Make sure a reservation station is available
+		if (fu instanceof FunctionalUnit &&
+		    !((FunctionalUnit)fu).isReservationStationAvail() ||
+		    fu instanceof LoadBuffer &&
+		    !((LoadBuffer)fu).isReservationStationAvail()) {
+			return;
 		}
 
 		// Send to reorder buffer
@@ -107,10 +111,14 @@ public class IssueUnit {
 			}
 		}
 		
-		
 		// Issue instruction
 		if (fu != null) {
-			((FunctionalUnit)fu).acceptIssue(issuee);
+			if (fu instanceof FunctionalUnit) {
+				((FunctionalUnit)fu).acceptIssue(issuee);
+			}
+			else if (fu instanceof LoadBuffer) {
+				((LoadBuffer)fu).acceptIssue(issuee);
+			}
 		}
 
 		simulator.setPC(issuee.isBranch() && issuee.getBranchPrediction() ?

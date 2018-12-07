@@ -59,6 +59,10 @@ public class IssuedInst {
       return regDestTag;
     }
 
+	public boolean getRegDestUsed() {
+		return regDestUsed;
+	}
+
     public int getPC() {
       return pc;
     }

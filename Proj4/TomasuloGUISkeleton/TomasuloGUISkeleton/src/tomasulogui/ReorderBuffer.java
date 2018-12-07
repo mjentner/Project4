@@ -92,7 +92,7 @@ public class ReorderBuffer {
     
     // TODO body of method
     if (cdb.getDataValid()) {
-        for (int i = frontQ; i != rearQ; i %= size) {
+        for (int i = frontQ; i != rearQ; i = (i+1) % size) {
             buff[i].readCDB(cdb);
         }
         int tag = cdb.getDataTag();
@@ -118,6 +118,9 @@ public class ReorderBuffer {
     ROBEntry newEntry = new ROBEntry(this);
     buff[rearQ] = newEntry;
     newEntry.copyInstData(inst, rearQ);
+	if (inst.getRegDestUsed()) {
+		regs.setSlotForReg(inst.getRegDest(), rearQ);
+	}
 
     rearQ = (rearQ + 1) % size;
   }

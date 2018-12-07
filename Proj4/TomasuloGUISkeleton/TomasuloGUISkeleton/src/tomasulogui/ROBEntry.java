@@ -107,11 +107,17 @@ public class ROBEntry {
     int reg1 = inst.getRegSrc1();
 	int reg1Tag;
 	int reg1Val;
-	boolean reg1Valid = reg1 != -1;
-	if (reg1Valid) {
+	if (reg1 != -1) {
 		reg1Tag = rob.getTagForReg(reg1);
-		reg1Val = rob.getDataForReg(reg1);
-		haveStoreAddress = reg1Tag == -1;
+		if (reg1Tag != -1) {
+			ROBEntry r = rob.getEntryByTag(reg1Tag);
+			reg1Val = r.getWriteValue();
+			haveStoreAddress = r.isComplete();
+		}
+		else {
+			reg1Val = rob.getDataForReg(reg1);
+			haveStoreAddress = true;
+		}
 		writeAddress = haveStoreAddress ? 
 					inst.getImmediate() + reg1Val :
 					inst.getImmediate();
@@ -124,15 +130,22 @@ public class ROBEntry {
     
     int reg2 = inst.getRegSrc2();
 	int reg2Tag;
-	int reg2Val;
-	boolean reg2Valid = reg2 != -1;
-	if (reg2Valid) {
+	if (reg2 != -1) {
 		reg2Tag = rob.getTagForReg(reg2);
-		reg2Val = rob.getDataForReg(reg2);
-		haveStoreData = reg2Tag == -1;
-		writeValue = reg2Val;
-		inst.setRegSrc2Value(reg2Val);
+		if (reg2Tag != -1) {
+			ROBEntry r = rob.getEntryByTag(reg2);
+			writeValue = r.getWriteValue();
+			haveStoreData = r.isComplete();
+		}
+		else {
+			writeValue = rob.getDataForReg(reg2);
+			haveStoreData = true;
+		}
+		inst.setRegSrc2Value(writeValue);
 		inst.setRegSrc2Tag(reg2Tag);
+		if (haveStoreData) {
+			inst.setRegSrc2Valid();
+		}
 	}
     
     storeDataReg = reg2;
@@ -141,12 +154,6 @@ public class ROBEntry {
     writeReg = inst.getRegDest();
 
     inst.setRegDestTag(frontQ);
-    if (haveStoreAddress) {
-        inst.setRegSrc1Valid();
-    }
-    if (haveStoreData) {
-        inst.setRegSrc2Valid();
-    }
 
     // TODO - This is a long and complicated method, probably the most complex
     // of the project.  It does 2 things:
