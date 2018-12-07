@@ -117,6 +117,9 @@ public class ROBEntry {
 					inst.getImmediate();
 		inst.setRegSrc1Value(reg1Val);
 		inst.setRegSrc1Tag(reg1Tag);
+		if (haveStoreAddress) {
+			inst.setRegSrc1Valid();
+		}
 	}
     
     int reg2 = inst.getRegSrc2();

@@ -43,6 +43,7 @@ public abstract class FunctionalUnit {
 		return true;
     } else if (stations[1] == null) {
         stations[1] = new ReservationStation(simulator);
+		stations[1].loadInst(inst);
 		return true;
     }
 	else {

@@ -113,6 +113,9 @@ public class IssueUnit {
 			((FunctionalUnit)fu).acceptIssue(issuee);
 		}
 
+		simulator.setPC(issuee.isBranch() && issuee.getBranchPrediction() ?
+		 			    issuee.getBranchTgt() : pc + 4);
+
 	}
 
 }

@@ -1,3 +1,5 @@
 *.class
 *.jar
+*.mo
+*.ss
 /Proj4/TomasuloGUISkeleton/TomasuloGUISkeleton/dist/

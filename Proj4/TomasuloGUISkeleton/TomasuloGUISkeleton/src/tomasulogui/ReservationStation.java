@@ -45,10 +45,10 @@ public class ReservationStation {
 
   public void snoop(CDB cdb) {
     //code to snoop on CDB each cycle
-    if (cdb.dataTag == tag1) {
+    if (cdb.dataTag == tag1 && !data1Valid) {
         data1 = cdb.dataValue;
         data1Valid = cdb.dataValid;
-    } else if (cdb.dataTag == tag2) {
+    } else if (cdb.dataTag == tag2 && !data2Valid) {
         data2 = cdb.dataValue;
         data2Valid = cdb.dataValid;
     }
@@ -63,5 +63,14 @@ public class ReservationStation {
     destTag = inst.regDestTag;
     function = inst.opcode;
     address = inst.branchTgt;
+	boolean reg2Used = inst.getRegSrc2Used();
+	data1Valid = !inst.getRegSrc1Used() || inst.getRegSrc1Valid();
+	data2Valid = !reg2Used || inst.getRegSrc2Valid();
+	tag1 = inst.getRegSrc1Tag();
+	tag2 = inst.getRegSrc2Tag();
+	data1 = inst.getRegSrc1Value();
+	data2 = reg2Used ? inst.getRegSrc2Value() : inst.getImmediate();
+	destTag = inst.getRegDestTag();
+
   }
 }

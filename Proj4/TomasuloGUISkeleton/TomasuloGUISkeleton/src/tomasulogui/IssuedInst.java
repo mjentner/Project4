@@ -95,6 +95,14 @@ public class IssuedInst {
       return immediate;
     }
 
+	public boolean getRegSrc1Used() {
+		return regSrc1Used;
+	}
+
+	public boolean getRegSrc2Used() {
+		return regSrc2Used;
+	}
+	
     public boolean getRegSrc1Valid() {
       return regSrc1Valid;
     }
