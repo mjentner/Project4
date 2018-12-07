@@ -9,7 +9,7 @@ public class IntDivide extends FunctionalUnit {
     }
 
     public int calculateResult(int station) {
-        int result = 0;
+        int result = stations[station].data1 / stations[station].data2;
         return result;
     }
 
