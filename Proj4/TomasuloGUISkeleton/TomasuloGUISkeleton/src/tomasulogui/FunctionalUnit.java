@@ -47,14 +47,14 @@ public abstract class FunctionalUnit {
   public void execCycle(CDB cdb) {
     // first check if a reservation station was freed by writeback
     if (canWriteback) {
-      stations[writebackStation] = null;
-      writebackStation = -1;
-      requestWriteback = false;
-	  executionStage = -1; 
-          //Dr.G said we needed this here instead of in each FU
-          cdb.setDataTag(stations[writebackStation].getDestTag());
-          cdb.setDataValue(writeData);
-          cdb.setDataValid(true);
+		stations[writebackStation] = null;
+		writebackStation = -1;
+		requestWriteback = false;
+		executionStage = -1; 
+		//Dr.G said we needed this here instead of in each FU
+//		cdb.setDataTag(stations[writebackStation].getDestTag());
+//		cdb.setDataValue(writeData);
+//		cdb.setDataValid(true);
     }
     // only execute if not stuck
     if (!requestWriteback) {

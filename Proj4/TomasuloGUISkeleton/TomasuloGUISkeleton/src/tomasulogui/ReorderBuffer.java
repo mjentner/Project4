@@ -71,7 +71,7 @@ public class ReorderBuffer {
         simulator.memory.setIntDataAtAddr(retiree.getWriteAddress(),
                                           retiree.getWriteValue());
     }
-    else {
+    else if (retiree.getWriteReg() != -1) {
         regs.setReg(retiree.getWriteReg(), retiree.getWriteValue());
         setTagForReg(retiree.getWriteReg(), -1);
     }

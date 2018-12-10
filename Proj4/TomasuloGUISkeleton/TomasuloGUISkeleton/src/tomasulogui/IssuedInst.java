@@ -55,6 +55,22 @@ public class IssuedInst {
       return regDest;
     }
 
+	public void setRegDest(int dest) {
+		regDest = dest;
+	}
+
+	public void setRegDestUsed() {
+		regDestUsed = true;
+	}
+
+	public void setRegSrc1Used() {
+		regSrc1Used = true;
+	}
+
+	public void setRegSrc2Used() {
+		regSrc2Used = true;
+	}
+
     public int getRegDestTag() {
       return regDestTag;
     }

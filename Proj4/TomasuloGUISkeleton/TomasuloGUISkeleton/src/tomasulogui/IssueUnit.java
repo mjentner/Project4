@@ -35,6 +35,9 @@ public class IssueUnit {
 		// Get IssuedInst
 		int pc = simulator.getPC();
 		Instruction inst = simulator.getMemory().getInstAtAddr(pc);
+		if (inst.getOpcode() == Instruction.INST_JAL) {
+			System.out.println("It's a function call!");
+		}
 		issuee = IssuedInst.createIssuedInst(inst);
 		issuee.setPC(pc);
 
@@ -65,6 +68,11 @@ public class IssueUnit {
 				fu = simulator.getDivider();
 				break;
 			}
+			case JAL:
+			case JALR: {
+				issuee.setRegDest(31);
+				issuee.setRegDestUsed();
+			}
 			case BEQ:
 			case BNE:
 			case BLTZ:
@@ -72,9 +80,8 @@ public class IssueUnit {
 			case BGEZ:
 			case BGTZ:
 			case J:
-			case JAL:
-			case JR:
-			case JALR: {
+			case JR: {
+				issuee.setBranch();
 				simulator.getBTB().predictBranch(issuee);
 				fu = simulator.getBranchUnit();
 				break;
@@ -121,8 +128,10 @@ public class IssueUnit {
 			}
 		}
 
-		simulator.setPC(issuee.isBranch() && issuee.getBranchPrediction() ?
-		 			    issuee.getBranchTgt() : pc + 4);
+		if (!issuee.isBranch()) {
+			simulator.setPC(pc + 4);
+		}
+		 			    
 
 	}
 
