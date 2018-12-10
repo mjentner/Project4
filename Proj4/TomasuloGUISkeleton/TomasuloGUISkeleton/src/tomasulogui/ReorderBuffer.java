@@ -56,6 +56,7 @@ public class ReorderBuffer {
 
     // TODO - this is where you look at the type of instruction and
     // figure out how to retire it properly
+	int writeReg = retiree.getWriteReg();
     if (!retiree.isComplete()) {
         shouldAdvance = false;
     }
@@ -71,9 +72,9 @@ public class ReorderBuffer {
         simulator.memory.setIntDataAtAddr(retiree.getWriteAddress(),
                                           retiree.getWriteValue());
     }
-    else if (retiree.getWriteReg() != -1) {
-        regs.setReg(retiree.getWriteReg(), retiree.getWriteValue());
-        setTagForReg(retiree.getWriteReg(), -1);
+    else if (writeReg != -1 && regs.getSlotForReg(writeReg) == frontQ) {
+        regs.setReg(writeReg, retiree.getWriteValue());
+        setTagForReg(writeReg, -1);
     }
       // if mispredict branch, won't do normal advance
       if (shouldAdvance) {
