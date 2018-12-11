@@ -18,9 +18,41 @@ public class IntAlu extends FunctionalUnit{
 		case SLL : {
 			return data1 << data2;
 		}
-		default : {
+                case SRL : {
+                    return data1 >>> data2;
+                }
+                case SRA : {
+                    return data1 >> data2;
+                }
+                case ADDI : {
 			return data1 + data2;
 		}
+                case SUB : {
+                    return data1 - data2;
+                }
+                
+                //falls through to both
+                case ANDI :
+                case AND : {
+                    return data1 & data2;
+                }
+                //falls through to both
+                case ORI :
+                case OR : {
+                    return data1 | data2;
+                }
+                
+                case XORI :
+                case XOR : {
+                    return data1 ^ data2;
+                }
+                
+                
+                
+                //default is ADD
+                default: {
+                    return data1 + data2;
+                }
 	}
   }
 
