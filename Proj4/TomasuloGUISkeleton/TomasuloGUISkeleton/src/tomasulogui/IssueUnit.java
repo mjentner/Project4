@@ -82,7 +82,6 @@ public class IssueUnit {
 			case J:
 			case JR: {
 				issuee.setBranch();
-				simulator.getBTB().predictBranch(issuee);
 				fu = simulator.getBranchUnit();
 				break;
 			}
@@ -98,6 +97,10 @@ public class IssueUnit {
 		    fu instanceof LoadBuffer &&
 		    !((LoadBuffer)fu).isReservationStationAvail()) {
 			return;
+		}
+
+		if (issuee.isBranch()) {
+			simulator.getBTB().predictBranch(issuee);
 		}
 
 		// Send to reorder buffer

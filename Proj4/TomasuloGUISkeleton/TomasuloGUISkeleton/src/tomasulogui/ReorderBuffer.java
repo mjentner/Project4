@@ -54,19 +54,46 @@ public class ReorderBuffer {
 
     boolean shouldAdvance = true;
 
+	IssuedInst.INST_TYPE opcode = retiree.getOpcode();
+	int pc = retiree.getInstPC();
+	int target = retiree.getTarget();
+	boolean mispredict = retiree.branchMispredicted();
+	boolean predictTaken = retiree.getPredictTaken();
+
+	if (opcode == IssuedInst.INST_TYPE.BEQ
+	 || opcode == IssuedInst.INST_TYPE.BNE
+	 || opcode == IssuedInst.INST_TYPE.BGTZ
+	 || opcode == IssuedInst.INST_TYPE.BLTZ
+	 || opcode == IssuedInst.INST_TYPE.BGEZ
+	 || opcode == IssuedInst.INST_TYPE.BLEZ
+	 || opcode == IssuedInst.INST_TYPE.J
+	 || opcode == IssuedInst.INST_TYPE.JR
+	 || opcode == IssuedInst.INST_TYPE.JAL
+	 || opcode == IssuedInst.INST_TYPE.JALR) {
+		BranchPredictor btb = simulator.getBTB();
+		btb.setBranchAddress(pc, target);
+		btb.setBranchResult(pc, mispredict ^ predictTaken);
+	}
+
     // TODO - this is where you look at the type of instruction and
     // figure out how to retire it properly
 	int writeReg = retiree.getWriteReg();
     if (!retiree.isComplete()) {
         shouldAdvance = false;
     }
-    else if (retiree.branchMispredicted()) {
+    else if (mispredict) {
         shouldAdvance = false;
         frontQ = 0;
         rearQ = 0;
         simulator.squashAllInsts();
-        simulator.pc.setPC(retiree.getPredictTaken() ? 
-                           retiree.getInstPC() : retiree.getTarget());
+        simulator.pc.setPC(retiree.predictTaken
+		  				   && opcode != IssuedInst.INST_TYPE.JR
+		                   && opcode != IssuedInst.INST_TYPE.JALR
+		                   ?  pc + 4
+		  	               : target);
+		for (int i = 0; i < size; i++) {
+			buff[i] = null;
+		}
     }
     else if (retiree.getOpcode() == IssuedInst.INST_TYPE.STORE) {
         simulator.memory.setIntDataAtAddr(retiree.getWriteAddress(),
@@ -94,11 +121,12 @@ public class ReorderBuffer {
     // TODO body of method
     if (cdb.getDataValid()) {
         for (int i = frontQ; i != rearQ; i = (i+1) % size) {
-            buff[i].readCDB(cdb);
+            buff[i].snoopCDB(cdb);
         }
-        int tag = cdb.getDataTag();
-        buff[tag].setWriteValue(cdb.getDataValue());
-        buff[tag].setComplete(true);
+		ROBEntry entry = buff[cdb.getDataTag()];
+		if (entry != null) {
+			entry.readCDB(cdb);
+		}
     }
   }
 
