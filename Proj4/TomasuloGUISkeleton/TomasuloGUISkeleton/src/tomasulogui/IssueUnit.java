@@ -35,9 +35,6 @@ public class IssueUnit {
 		// Get IssuedInst
 		int pc = simulator.getPC();
 		Instruction inst = simulator.getMemory().getInstAtAddr(pc);
-		if (inst.getOpcode() == Instruction.INST_JAL) {
-			System.out.println("It's a function call!");
-		}
 		issuee = IssuedInst.createIssuedInst(inst);
 		issuee.setPC(pc);
 
