@@ -98,15 +98,20 @@ public class ReorderBuffer {
 		for (int i = 0; i < size; i++) {
 			buff[i] = null;
 		}
+		for (int i = 0; i < 32; i++) {
+			regs.setSlotForReg(i, -1);
+		}
     }
 	// For stores and writeback instructions write to register or memory
     else if (retiree.getOpcode() == IssuedInst.INST_TYPE.STORE) {
         simulator.memory.setIntDataAtAddr(retiree.getWriteAddress(),
                                           retiree.getWriteValue());
     }
-    else if (writeReg != -1 && regs.getSlotForReg(writeReg) == frontQ) {
+    else if (writeReg != -1) {
+		if (regs.getSlotForReg(writeReg) == frontQ) {
+			setTagForReg(writeReg, -1);
+		}
         regs.setReg(writeReg, retiree.getWriteValue());
-        setTagForReg(writeReg, -1);
     }
       // if mispredict branch, won't do normal advance
       if (shouldAdvance) {
