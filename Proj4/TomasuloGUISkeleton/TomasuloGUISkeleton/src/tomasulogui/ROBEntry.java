@@ -3,8 +3,6 @@ package tomasulogui;
 public class ROBEntry {
 	ReorderBuffer rob;
 
-	// TODO - add many more fields into entry
-	// I deleted most, and only kept those necessary to compile GUI
 	boolean complete = false;
 	boolean predictTaken = false;
 	boolean mispredicted = false;
@@ -59,6 +57,8 @@ public class ROBEntry {
 		}
 	}
 
+	// This method is used to allow stores to update their address and data
+	// fields from the cdb
 	public void snoopCDB(CDB cdb) {
 		if (opcode == IssuedInst.INST_TYPE.STORE) {
 			int tag = cdb.getDataTag();
@@ -75,20 +75,27 @@ public class ROBEntry {
 		}
 	}
 
+	// This method is used to allow the entry referenced by the cdb tag
+	// to update its write value and be marked as complete
 	public void readCDB(CDB cdb) {
 		int tag = cdb.getDataTag();
 		int cdbValue = cdb.getDataValue();
+
+		// If true branch, set mispredicted based on comparison
+		// of predictTaken and mispredicted
 		if (opcode == IssuedInst.INST_TYPE.BEQ
 		 || opcode == IssuedInst.INST_TYPE.BNE
 		 || opcode == IssuedInst.INST_TYPE.BGEZ
 		 || opcode == IssuedInst.INST_TYPE.BGTZ
 		 || opcode == IssuedInst.INST_TYPE.BLEZ
 		 || opcode == IssuedInst.INST_TYPE.BLTZ) {
-			mispredicted = cdbValue != 0;
+			mispredicted = (cdbValue != 0) != predictTaken;
 		}
+		// Set writeValue based on cdbValue
 		else {
 			writeValue = cdbValue;
 		}
+		// Instruction is now complete
 		complete = true;
 	}
 
@@ -119,11 +126,16 @@ public class ROBEntry {
 
 
 	public void copyInstData(IssuedInst inst, int frontQ) {
+
+		// Set some fields that can be copied directly from inst
 		instPC = inst.getPC();
 		opcode = inst.getOpcode();
 		predictTaken = inst.getBranchPrediction();
+
+		// predictions are assumed correct until the branch unit says otherwise
 		mispredicted = false;
 
+		// Set fields related to regSrc1
 		int reg1 = inst.getRegSrc1();
 		int reg1Tag = -1;
 		int reg1Val;
@@ -139,8 +151,8 @@ public class ROBEntry {
 				haveStoreAddress = true;
 			}
 			writeAddress = haveStoreAddress ? 
-			inst.getImmediate() + reg1Val :
-			inst.getImmediate();
+			               inst.getImmediate() + reg1Val :
+			               inst.getImmediate();
 			inst.setRegSrc1Value(reg1Val);
 			inst.setRegSrc1Tag(reg1Tag);
 			if (haveStoreAddress) {
@@ -148,6 +160,7 @@ public class ROBEntry {
 			}
 		}
 
+		// Set fields related to regSrc2
 		int reg2 = inst.getRegSrc2();
 		int reg2Tag = -1;
 		if (reg2 != -1) {
@@ -168,6 +181,7 @@ public class ROBEntry {
 			}
 		}
 
+		// If JAL or JALR, set their available src field to pc+4
 		if (opcode == IssuedInst.INST_TYPE.JAL) {
 			inst.setRegSrc1Valid();
 			inst.setRegSrc1Used();
@@ -179,22 +193,24 @@ public class ROBEntry {
 			inst.setRegSrc2Value(inst.getPC() + 4);
 		}
 
+		// Set values used by store and branch instructions
+		// these values are ignored by other instructions, so setting them is
+		// harmless
 		storeDataTag = reg2Tag;
 		storeAddressTag = reg1Tag;
 		target = inst.getBranchTgt();
 		writeReg = inst.getRegDest();
 
+		// Instruction is complete if 
+		//  a. It doesn't use a functional unit (NOP, HALT, and STORE) AND
+		//  b. It isn't waiting on any registers (storeAddress and storeData)
 		complete = opcode == IssuedInst.INST_TYPE.NOP
 		        || opcode == IssuedInst.INST_TYPE.HALT
 		        || opcode == IssuedInst.INST_TYPE.STORE
 		            && haveStoreAddress && haveStoreData;
+
+		// Set destination tag of instruction
 		inst.setRegDestTag(frontQ);
-
-		// TODO - This is a long and complicated method, probably the most complex
-		// of the project.  It does 2 things:
-		// 1. update the instruction, as shown in 2nd line of code above
-		// 2. update the fields of the ROBEntry, as shown in the 1st line of code above
-
-		}
-
 	}
+
+}
