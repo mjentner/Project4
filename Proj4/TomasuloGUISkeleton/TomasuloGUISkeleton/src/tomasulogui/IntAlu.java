@@ -7,7 +7,7 @@ public class IntAlu extends FunctionalUnit{
     super(sim);
   }
 
-
+  @Override
   public int calculateResult(int station) {
      // just placeholder code
 	ReservationStation stat = stations[station];
@@ -24,6 +24,7 @@ public class IntAlu extends FunctionalUnit{
 	}
   }
 
+  @Override
   public int getExecCycles() {
     return EXEC_CYCLES;
   }

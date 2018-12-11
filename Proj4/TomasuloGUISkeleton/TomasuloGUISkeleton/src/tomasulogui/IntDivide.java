@@ -8,11 +8,13 @@ public class IntDivide extends FunctionalUnit {
         super(sim);
     }
 
+	@Override
     public int calculateResult(int station) {
-        int result = stations[station].data1 / stations[station].data2;
-        return result;
+		ReservationStation stat = stations[station];
+        return stat.getData1() / stat.getData2();
     }
 
+	@Override
     public int getExecCycles() {
         return EXEC_CYCLES;
     }

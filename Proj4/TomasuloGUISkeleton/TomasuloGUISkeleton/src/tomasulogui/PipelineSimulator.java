@@ -41,7 +41,7 @@ public class PipelineSimulator {
 
     public PipelineSimulator(String fileName) {
 
-      if (fileName != "") {
+      if (!fileName.equals("")) {
         memory = new MemoryModel(fileName);
         isMemoryLoaded = true;
       }
@@ -359,10 +359,10 @@ public class PipelineSimulator {
       regs.squashAll();
 
       loader.squashAll();
-//      alu.squashAll();
-//      multiplier.squashAll();
-//      divider.squashAll();
-//      branchUnit.squashAll();
+      alu.squashAll();
+      multiplier.squashAll();
+      divider.squashAll();
+      branchUnit.squashAll();
       cdb.squashAll();
     }
 
@@ -370,9 +370,11 @@ public class PipelineSimulator {
       // here, we need to poll the functional units and see if they want to
       // writeback.  We pick longest running of those who want to use CDB and
       // notify them they can write
+
+	  // Clear the last write to the CDB
       cdb.setDataValid(false);
 
-      // hint: start with divider, and give it first chance of getting CDB
+	  // Check each functional unit in order of decreasing runtime
 	  FunctionalUnit writer = null;
 	  if (divider.isRequestingWriteback()) {
 		  writer = divider;
@@ -380,24 +382,31 @@ public class PipelineSimulator {
 	  else if (multiplier.isRequestingWriteback()) {
 		  writer = multiplier;
 	  }
-	  else if (branchUnit.isRequestingWriteback()) {
-		  writer = branchUnit;
-	  }
+	  // Because LoadBuffer does not implement FunctionalUnit,
+	  // its logic needs to be done separately
 	  else if (loader.isRequestingWriteback()) {
 		  loader.setCanWriteback();
 		  cdb.setDataValid(true);
 		  cdb.setDataTag(loader.getWriteTag());
 		  cdb.setDataValue(loader.getWriteData());
 	  }
+	  else if (branchUnit.isRequestingWriteback()) {
+		  writer = branchUnit;
+	  }
 	  else if (alu.isRequestingWriteback()) {
 		  writer = alu;
 	  }
+
+	  // Write the writer's value to the cdb
 	  if (writer != null) {
 		  writer.setCanWriteback();
 		  cdb.setDataValid(true);
 		  cdb.setDataTag(writer.getWriteTag());
 		  cdb.setDataValue(writer.getWriteData());
 	  }
+
+	  // We have the reorder buffer read from the cdb here,
+	  // since it doesn't seem to do that anywhere else
 	  reorder.readCDB(cdb);
     }
 

@@ -194,21 +194,16 @@ public class IssuedInst {
     }
 
     public boolean determineIfBranch() {
-      if (opcode == INST_TYPE.BEQ ||
-          opcode == INST_TYPE.BNE ||
-          opcode == INST_TYPE.BLTZ ||
-          opcode == INST_TYPE.BLEZ ||
-          opcode == INST_TYPE.BGEZ ||
-          opcode == INST_TYPE.BGTZ ||
-          opcode == INST_TYPE.J ||
-          opcode == INST_TYPE.JAL ||
-          opcode == INST_TYPE.JR ||
-          opcode == INST_TYPE.JALR) {
-        return true;
-      }
-      else {
-        return false;
-      }
+	  return opcode == INST_TYPE.BEQ ||
+             opcode == INST_TYPE.BNE ||
+             opcode == INST_TYPE.BLTZ ||
+             opcode == INST_TYPE.BLEZ ||
+             opcode == INST_TYPE.BGEZ ||
+             opcode == INST_TYPE.BGTZ ||
+             opcode == INST_TYPE.J ||
+             opcode == INST_TYPE.JAL ||
+             opcode == INST_TYPE.JR ||
+             opcode == INST_TYPE.JALR;
 
     }
 

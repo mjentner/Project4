@@ -9,11 +9,14 @@ public class BranchUnit
         super(sim);
     }
 
+	@Override
     public int calculateResult(int station) {
 		ReservationStation stat = stations[station];
 		int data1 = stat.getData1();
 		int data2 = stat.getData2();
 		switch (stat.getFunction()) {
+			// For true branch instructions, return a "boolean" flag
+			// indicating whether the branch was taken
 			case BEQ : {
 				return data1 == data2 ? 1 : 0;
 			}
@@ -32,25 +35,30 @@ public class BranchUnit
 			case BGTZ : {
 				return data1 > 0 ? 1 : 0;
 			}
+			// J and JR are treated as always taken branchs. Return "true"
 			case J : {
 				return 1;
+			}
+			// JR and JALR need to set the branch target in the reorder buffer
+			case JR : {
+				simulator.getROB().getEntryByTag(stat.getDestTag())
+				                  .setTarget(data1);
+				return 1;
+			}
+			// JALR and JAL return the value to be written to R31
+			case JALR : {
+				simulator.getROB().getEntryByTag(stat.getDestTag())
+				                  .setTarget(data1);
+				return data2;
 			}
 			case JAL : {
 				return data1;
 			}
-			case JR : {
-				simulator.getROB().getEntryByTag(stat.getDestTag()).setTarget(data1);
-				return 1;
-			}
-			case JALR : {
-				simulator.getROB().getEntryByTag(stat.getDestTag()).setTarget(data1);
-				return data2;
-			}
 		}
-        // todo fill in
         return 0;
     }
 
+	@Override
     public int getExecCycles() {
         return EXEC_CYCLES;
     }

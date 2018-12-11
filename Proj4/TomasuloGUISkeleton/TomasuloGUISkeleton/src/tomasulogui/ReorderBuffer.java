@@ -60,6 +60,10 @@ public class ReorderBuffer {
 	boolean mispredict = retiree.branchMispredicted();
 	boolean predictTaken = retiree.getPredictTaken();
 
+	// If it's a branch update the BTB's information
+	// Note that the BTB always predicts taken for JR and JALR
+	// therefore, feeding it with our version of mispredict for those to inst's
+	// doesn't mess anything up
 	if (opcode == IssuedInst.INST_TYPE.BEQ
 	 || opcode == IssuedInst.INST_TYPE.BNE
 	 || opcode == IssuedInst.INST_TYPE.BGTZ
@@ -75,12 +79,12 @@ public class ReorderBuffer {
 		btb.setBranchResult(pc, mispredict ^ predictTaken);
 	}
 
-    // TODO - this is where you look at the type of instruction and
-    // figure out how to retire it properly
 	int writeReg = retiree.getWriteReg();
     if (!retiree.isComplete()) {
         shouldAdvance = false;
     }
+	// On a mispredict, squash everything, update the program counter,
+	// and flush the reorder buffer
     else if (mispredict) {
         shouldAdvance = false;
         frontQ = 0;
@@ -95,6 +99,7 @@ public class ReorderBuffer {
 			buff[i] = null;
 		}
     }
+	// For stores and writeback instructions write to register or memory
     else if (retiree.getOpcode() == IssuedInst.INST_TYPE.STORE) {
         simulator.memory.setIntDataAtAddr(retiree.getWriteAddress(),
                                           retiree.getWriteValue());
@@ -118,7 +123,6 @@ public class ReorderBuffer {
     // could be destination reg
     // could be store address source
     
-    // TODO body of method
     if (cdb.getDataValid()) {
         for (int i = frontQ; i != rearQ; i = (i+1) % size) {
             buff[i].snoopCDB(cdb);

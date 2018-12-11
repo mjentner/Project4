@@ -32,10 +32,11 @@ public abstract class FunctionalUnit {
   }
 
  
+  // Discard currently executed instruction and clear reservation stations.
   public void squashAll() {
-    //fill in
-//	executionProgress = -1;
-//	stationInUse = -1;
+	executionStage = -1;
+	writebackStation = -1;
+	requestWriteback = false;
 	stations[0] = null;
 	stations[1] = null;
   }
@@ -45,6 +46,7 @@ public abstract class FunctionalUnit {
   public abstract int getExecCycles();
 
   public void execCycle(CDB cdb) {
+
     // first check if a reservation station was freed by writeback
     if (canWriteback) {
 		stations[writebackStation] = null;
@@ -58,6 +60,8 @@ public abstract class FunctionalUnit {
     }
     // only execute if not stuck
     if (!requestWriteback) {
+
+		// If not executing, look for a reservation station ready to execute
 		if (executionStage == -1) {
 			for (int i = 0; i < BUFFER_SIZE; i++) {
 				ReservationStation station = stations[i];
@@ -69,18 +73,20 @@ public abstract class FunctionalUnit {
 				}
 			}
 		}
+
+		// If executing, increment the execution stage
 		else {
 			executionStage++;
 		}
-		if (executionStage == getExecCycles()) {
-			
-			// we are finished execution
 
+		// If finished executing, set requestWriteback flag and writeData
+		if (executionStage == getExecCycles()) {
 			requestWriteback = true;
 			writeData = calculateResult(writebackStation);
 		}
 
     }
+
     // check reservationStations for cdb data
     if (cdb.getDataValid()) {
       for (int i = 0; i < BUFFER_SIZE; i++) {
@@ -93,15 +99,16 @@ public abstract class FunctionalUnit {
   }
 
   public void acceptIssue(IssuedInst inst) {
-  //fill in reservation station (if available) with data from inst
+    //fill in reservation station (if available) with data from inst
     int slot=0;
-    for (slot=0; slot < BUFFER_SIZE; slot++) {
+    for (; slot < BUFFER_SIZE; slot++) {
      if (stations[slot] == null) {
        break;
      }
    }
    if (slot == BUFFER_SIZE) {
-     throw new MIPSException("Functional Unit accept issue: station not available");
+     throw new MIPSException
+                   ("Functional Unit accept issue: station not available");
    }
 
    ReservationStation station = new ReservationStation(simulator);

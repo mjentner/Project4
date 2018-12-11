@@ -8,12 +8,13 @@ public class IntMult extends FunctionalUnit {
         super(sim);
     }
 
+	@Override
     public int calculateResult(int station) {
-        int result = stations[station].getData1() * stations[station].getData2();
-        return result;
-
+		ReservationStation stat = stations[station];
+        return stat.getData1() * stat.getData2();
     }
 
+	@Override
     public int getExecCycles() {
         return EXEC_CYCLES;
     }

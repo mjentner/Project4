@@ -68,6 +68,8 @@ public class IssueUnit {
 				fu = simulator.getDivider();
 				break;
 			}
+			// Branches need some special handling. A branch flag needs set.
+			// JAL and JALR need to be set to write to R31
 			case JAL:
 			case JALR: {
 				issuee.setRegDest(31);
@@ -99,14 +101,18 @@ public class IssueUnit {
 			return;
 		}
 
+		// Set program counter. This is done with the BTB for branches
 		if (issuee.isBranch()) {
 			simulator.getBTB().predictBranch(issuee);
+		}
+		else {
+			simulator.setPC(pc + 4);
 		}
 
 		// Send to reorder buffer
 		simulator.getROB().updateInstForIssue(issuee);
 
-		// TODO check CDB for forward data
+		// check CDB for forward data
 		CDB cdb = simulator.getCDB();
 		if (cdb.getDataValid()) {
 			int cdbTag = cdb.getDataTag();
@@ -130,12 +136,6 @@ public class IssueUnit {
 				((LoadBuffer)fu).acceptIssue(issuee);
 			}
 		}
-
-		if (!issuee.isBranch()) {
-			simulator.setPC(pc + 4);
-		}
-		 			    
-
 	}
 
 }
