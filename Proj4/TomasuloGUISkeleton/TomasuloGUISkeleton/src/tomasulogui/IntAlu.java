@@ -24,9 +24,6 @@ public class IntAlu extends FunctionalUnit{
                 case SRA : {
                     return data1 >> data2;
                 }
-                case ADDI : {
-			return data1 + data2;
-		}
                 case SUB : {
                     return data1 - data2;
                 }
