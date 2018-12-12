@@ -68,7 +68,8 @@ public class LoadBuffer {
         for (int i = 0; i < BUFFER_SIZE; i++) {
           LoadEntry entry = buff[i];
           if (entry != null) {
-            if (entry.isReady()) {
+			int destTag = entry.getDestTag();
+            if (entry.isReady() && simulator.getROB().safeToLoad(destTag)) {
               writebackEntry = i;
               writeTag = entry.getDestTag();
               loadExecuting = true;

@@ -20,6 +20,15 @@ public class ReorderBuffer {
     return buff[tag];
   }
 
+  boolean safeToLoad(int tag) {
+	  for (int i = frontQ; i != tag; i = (i+1) % size) {
+		  if (buff[i].getOpcode() == IssuedInst.INST_TYPE.STORE) {
+			  return false;
+		  }
+	  }
+	  return true;
+  }
+
   public int getInstPC(int tag) {
     return buff[tag].getInstPC();
   }
